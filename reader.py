@@ -18,10 +18,13 @@ EV3 = serial.Serial('/dev/rfcomm0')
 print("Listening for EV3 Bluetooth messages, press CTRL C to quit.")
 left = 10
 right = 10
+print("Sending UP")
 s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
 EV3.write(s)
+print("Done. Sending DOWN")
 s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
 EV3.write(s)
+print("Done!")
 EV3.close()
 
 for _ in range(1000):
