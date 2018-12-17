@@ -4,30 +4,24 @@ import cv2 as cv
 import config
 import serial
 import time
+import EV3BT
 from timeit import default_timer as timer
 
 face_cascade = cv.CascadeClassifier(config.face_cascade)
 
-response = requests.request("GET", config.api_url, headers=config.headers)
-response.raise_for_status()
-data = response.json()
+#response = requests.request("GET", config.api_url, headers=config.headers)
+#response.raise_for_status()
+#data = response.json()
 
 # assume sudo rfcomm connect hci0 00:16:53:56:43:DE
 EV3 = serial.Serial('/dev/rfcomm0')
 print("Listening for EV3 Bluetooth messages, press CTRL C to quit.")
-try:
-   while True:
-      n = EV3.inWaiting()
-      if n != 0:
-         s = EV3.read(n)
-         for n in s:
-            print("%02X" % ord(n)),
-         print()
-      else:
-         # No data is ready to be processed
-         time.sleep(0.5)
-except KeyboardInterrupt:
-   pass
+left = 10
+right = 10
+s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
+EV3.write(s)
+s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
+EV3.write(s)
 EV3.close()
 
 for _ in range(1000):
