@@ -21,6 +21,7 @@ right = 10
 print("Sending UP")
 s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
 EV3.write(s)
+time.sleep(10)
 print("Done. Sending DOWN")
 s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
 EV3.write(s)
