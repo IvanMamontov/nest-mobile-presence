@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import pygame
+import pygame.midi
 
 import requests
 import numpy as np
@@ -27,8 +28,8 @@ def say_hello():
         logger.info("Going UP")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
         EV3.write(s)
-        pygame.mixer.init()
-        pygame.mixer.music.load("./data/6days.wav")
+        pygame.midi.init()
+        pygame.mixer.music.load(os.path.join("data","6days.wav"))
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
             continue
