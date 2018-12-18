@@ -66,15 +66,16 @@ def main_loop():
                     faces = face_cascade.detectMultiScale(gray, 1.05, 6)
                     if len(faces) > 0:
                         contains_big_face = False
+                        timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
                         for (x, y, w, h) in faces:
                             if w * h / 2073600 > 0.10:  # assume 1080 * 1920 = 2073600, so more than 10%
                                 cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                                 contains_big_face = True
-                                logger.info("Detected face with {}".format(w * h / 2073600))
+                                logger.info("Detected face with {} with timestamp {}".format(w * h / 2073600, timestamp))
                         if contains_big_face:
                             cv.imwrite(
                                 os.path.join("images",
-                                             "{}.jpg".format(datetime.datetime.now().strftime("%d_%m_%Y_%H_%M"))),
+                                             "{}.jpg".format(timestamp)),
                                 img)
                             say_hello()
                             time.sleep(15)  # let him go
