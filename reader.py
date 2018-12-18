@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import sys
+import pygame
 
 import requests
 import numpy as np
@@ -26,6 +27,11 @@ def say_hello():
         logger.info("Going UP")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
         EV3.write(s)
+        pygame.mixer.init()
+        pygame.mixer.music.load("./data/6days.wav")
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            continue
         time.sleep(15)
         logger.info("Going down DOWN")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
