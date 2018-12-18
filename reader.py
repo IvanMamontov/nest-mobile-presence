@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 
 import requests
 import numpy as np
@@ -52,5 +53,8 @@ for _ in range(100000):
                             os.path.join("images", "{}.jpg".format(datetime.datetime.now().strftime("%d_%m_%Y_%H_%M"))),
                             img)
                         say_hello()
+    except KeyboardInterrupt:
+        # quit
+        sys.exit()
     except BaseException as error:
         print('An exception occurred in dispatch thread: {}'.format(error))
