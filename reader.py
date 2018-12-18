@@ -71,6 +71,7 @@ def main_loop():
 if __name__ == "__main__":
     logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
     rootLogger = logging.getLogger()
+    rootLogger.setLevel(logging.INFO)
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(logFormatter)
     rootLogger.addHandler(console_handler)

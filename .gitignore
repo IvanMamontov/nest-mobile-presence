@@ -3,3 +3,4 @@
 conf/
 images/*
 logs/*
+__pycache__/
