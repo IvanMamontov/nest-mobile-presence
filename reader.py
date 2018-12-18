@@ -53,6 +53,7 @@ for _ in range(100000):
                             os.path.join("images", "{}.jpg".format(datetime.datetime.now().strftime("%d_%m_%Y_%H_%M"))),
                             img)
                         say_hello()
+                        time.sleep(15) # let him go
     except KeyboardInterrupt:
         # quit
         sys.exit()
