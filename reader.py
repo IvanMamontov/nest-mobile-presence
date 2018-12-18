@@ -28,11 +28,7 @@ def say_hello():
         logger.info("Going UP")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
         EV3.write(s)
-        pygame.midi.init()
-        pygame.mixer.music.load(os.path.join("data","6days.wav"))
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            continue
+        play_voice()
         time.sleep(15)
         logger.info("Going down DOWN")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
@@ -41,6 +37,18 @@ def say_hello():
         logger.error("Unable to open serial port {}".format(error))
     EV3.close()
     logger.info("Done! Connection Close")
+
+
+def play_voice():
+    try:
+        pygame.midi.init()
+        pygame.mixer.init(44100, -16, 2, 2048)
+        pygame.mixer.music.load(os.path.join("data", "6days.wav"))
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            continue
+    except BaseException as error:
+        logger.error("Unable to play sound {}".format(error))
 
 
 def main_loop():
@@ -93,4 +101,5 @@ if __name__ == "__main__":
     # .  ##....##.##...###.##.....##.##..##..##.##.....##.##.....##.##...###
     # ..  ######..##....##..#######...###..###..##.....##.##.....##.##....##
     logger.info("Snowman is starting")
+    play_voice()
     main_loop()
