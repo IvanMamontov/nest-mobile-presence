@@ -1,3 +1,4 @@
+
 import datetime
 import logging
 import os
@@ -53,6 +54,14 @@ def play_voice():
         logger.error("Unable to play sound {}".format(error))
 
 
+def find_the_face(faces):
+    the_face = (0, 0, 0, 0)
+    for (x, y, w, h) in faces:
+        if w * h > the_face[2] * the_face[3]:
+            the_face = (x, y, w, h)
+    return the_face
+
+
 def main_loop():
     for _ in range(100000):
         try:
@@ -65,20 +74,19 @@ def main_loop():
                     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
                     faces = face_cascade.detectMultiScale(gray, 1.05, 6)
                     if len(faces) > 0:
+                        (x, y, w, h) = find_the_face(faces)
                         contains_big_face = False
                         timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
-                        for (x, y, w, h) in faces:
-                            if w * h / 2073600 > 0.10:  # assume 1080 * 1920 = 2073600, so more than 10%
-                                cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                                contains_big_face = True
-                                logger.info("Detected face with {} with timestamp {}".format(w * h / 2073600, timestamp))
-                        if contains_big_face:
+                        if w * h / 2073600 > 0.10:  # assume 1080 * 1920 = 2073600, so more than 10%
+                            cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                            logger.info("Detected big enough({}) face at {}".format(w * h / 2073600, timestamp))
                             cv.imwrite(
-                                os.path.join("images",
-                                             "{}.jpg".format(timestamp)),
-                                img)
+                                os.path.join("images", "{}.jpg".format(timestamp)), img)
                             say_hello()
                             time.sleep(15)  # let him go
+                            logger.info("Ready to Go!")
+                        else:
+                            logger.info("Detected face too small({}) at {}".format(w * h / 2073600, timestamp))
         except KeyboardInterrupt:
             # quit
             sys.exit()
