@@ -49,7 +49,7 @@ def play_voice():
         pygame.midi.init()
         pygame.mixer.init(44100, -16, 2, 2048)
         pygame.mixer.music.set_volume(10)
-        pygame.mixer.music.load(os.path.join("data", "6days.wav"))
+        pygame.mixer.music.load(os.path.join("data", "12days.wav"))
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
             continue
