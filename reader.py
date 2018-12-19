@@ -77,7 +77,7 @@ def main_loop():
                         (x, y, w, h) = find_the_face(faces)
                         contains_big_face = False
                         timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
-                        if w * h / 2073600 > 0.10:  # assume 1080 * 1920 = 2073600, so more than 10%
+                        if w * h / 2073600 > 0.03:  # assume 1080 * 1920 = 2073600, so more than 10%
                             cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                             logger.info("Detected big enough({}) face at {}".format(w * h / 2073600, timestamp))
                             cv.imwrite(
@@ -112,5 +112,6 @@ if __name__ == "__main__":
     # .  ##....##.##...###.##.....##.##..##..##.##.....##.##.....##.##...###
     # ..  ######..##....##..#######...###..###..##.....##.##.....##.##....##
     logger.info("Snowman is starting")
+    say_hello()
     play_voice()
     main_loop()
