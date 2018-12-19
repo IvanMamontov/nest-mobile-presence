@@ -21,7 +21,7 @@ face_cascade = cv.CascadeClassifier(config.face_cascade)
 # data = response.json()
 logger = logging.getLogger()
 
-
+ 
 def say_hello():
     # assume sudo rfcomm connect hci0 00:16:53:56:43:DE
     EV3 = serial.Serial('/dev/rfcomm0')
