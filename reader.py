@@ -38,6 +38,7 @@ def say_hello():
         logger.info("Going down DOWN")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
         EV3.write(s)
+        time.sleep(7)
         logger.info("Done! Going to close connection")
     except BaseException as error:
         logger.error("Unable to open serial port {}".format(error))
@@ -115,8 +116,5 @@ if __name__ == "__main__":
     # .  ##....##.##...###.##.....##.##..##..##.##.....##.##.....##.##...###
     # ..  ######..##....##..#######...###..###..##.....##.##.....##.##....##
     logger.info("Snowman is starting")
-    for i in range(0, 10):
-        say_hello()
-        time.sleep(12)
-    play_voice()
+    say_hello()
     main_loop()
