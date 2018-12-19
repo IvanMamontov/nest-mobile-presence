@@ -117,5 +117,6 @@ if __name__ == "__main__":
     logger.info("Snowman is starting")
     for i in range(0, 10):
         say_hello()
+        time.sleep(5)
     play_voice()
     main_loop()
