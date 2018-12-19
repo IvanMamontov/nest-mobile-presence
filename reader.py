@@ -29,16 +29,19 @@ def say_hello():
         logger.info("Going UP")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
         EV3.write(s)
-        time.sleep(10)
+        logger.info("Sleeping for 6 sec")
+        time.sleep(6)
+        logger.info("Make a noise")
         play_voice()
-        time.sleep(7)
+        logger.info("Sleeping for 5 sec")
+        time.sleep(5)
         logger.info("Going down DOWN")
         s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
         EV3.write(s)
+        logger.info("Done! Going to close connection")
     except BaseException as error:
         logger.error("Unable to open serial port {}".format(error))
     EV3.close()
-    logger.info("Done! Connection Close")
 
 
 def play_voice():
