@@ -1,4 +1,3 @@
-
 import datetime
 import logging
 import os
@@ -15,42 +14,33 @@ import time
 import EV3BT
 
 face_cascade = cv.CascadeClassifier(config.face_cascade)
-
-# response = requests.request("GET", config.api_url,  data=payload,  headers=config.headers)
-# response.raise_for_status()
-# data = response.json()
 logger = logging.getLogger()
 
- 
-def say_hello():
+
+def say_hello(serial, face_count):
     # assume sudo rfcomm connect hci0 00:16:53:56:43:DE
-    EV3 = serial.Serial('/dev/rfcomm0')
     try:
         logger.info("Going UP")
-        s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
-        EV3.write(s)
-        logger.info("Sleeping for 7 sec")
-        time.sleep(7)
+        if serial:
+            s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'up', 10)
+            serial.write(s)
+            logger.info("Sleeping for 7 sec")
+            time.sleep(7)
         logger.info("Make a noise")
         play_voice()
         logger.info("Sleeping for 1 sec")
         time.sleep(1)
         logger.info("Going down DOWN")
-        s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
-        EV3.write(s)
-        time.sleep(7)
-        logger.info("Done! Going to close connection")
-    except BaseException as error:
-        logger.error("Unable to open serial port {}".format(error))
-    EV3.close()
+        if serial:
+            s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
+            serial.write(s)
+            time.sleep(7)
+    except serial.SerialException as error:
+        logger.error("Unable to write to serial interface {}".format(error))
 
 
 def play_voice():
     try:
-        pygame.midi.init()
-        pygame.mixer.init(44100, -16, 2, 2048)
-        pygame.mixer.music.set_volume(10)
-        pygame.mixer.music.load(os.path.join("data", "12days.wav"))
         pygame.mixer.music.play()
         while pygame.mixer.music.get_busy():
             continue
@@ -58,50 +48,56 @@ def play_voice():
         logger.error("Unable to play sound {}".format(error))
 
 
-def find_the_face(faces):
-    the_face = (0, 0, 0, 0)
-    for (x, y, w, h) in faces:
-        if w * h > the_face[2] * the_face[3]:
-            the_face = (x, y, w, h)
-    return the_face
-
-
-def main_loop():
+def main_loop(serial):
     while True:
         try:
             resp = requests.request("GET", config.cam_url, headers=config.headers, params=config.auth, stream=True)
-            if resp.status_code == 200 and resp.headers['content-type'] == 'image/jpeg':
-                img = np.asarray(bytearray(resp.content), dtype="uint8")
-                img = cv.imdecode(img, cv.IMREAD_COLOR)
-                height, width, channels = img.shape
-                if height == 1080 and width == 1920:
-                    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-                    faces = face_cascade.detectMultiScale(gray, 1.05, 6)
-                    if len(faces) > 0:
-                        (x, y, w, h) = find_the_face(faces)
-                        contains_big_face = False
-                        timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
-                        if w * h / 2073600 > 0.001:
-                            cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                            cv.rectangle(img, (400, 0), (1200, 800), (0, 255, 0), 2)
-                            if 400 < x < 1200 and y < 800:  # assume 1080 * 1920 = 2073600, so more than 10%
-                                logger.info("Detected big enough({}) face at {}".format(w * h / 2073600, timestamp))
-                                cv.imwrite(
-                                    os.path.join("images", "{}.jpg".format(timestamp)), img)
-                                say_hello()
-                                time.sleep(15)  # let him go
-                                logger.info("Ready to Go!")
-                            else:
-                                logger.info("Detected face out of zone({}x{}) at {}".format(x, y, timestamp))
-                                cv.imwrite(
-                                    os.path.join("images", "out_of_zone_{}.jpg".format(timestamp)), img)
-                        else:
-                            logger.info("Detected face too small({}) at {}".format(w * h / 2073600, timestamp))
+            if resp.status_code == 200 and resp.headers['content-type'] == 'image/jpeg' and int(
+                    resp.headers['content-length']) != 0:
+                img_arr = np.asarray(bytearray(resp.content), dtype="uint8")
+                img = cv.imdecode(img_arr, cv.IMREAD_COLOR)
+                # img = cv.imread("./images/20_12_2018_15_45.jpg")
+                img = img[0:900, 200:1500]  # crop the image to speedup processing
+                gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+                faces = face_cascade.detectMultiScale(gray, 1.05, 6)
+                face_count = 0
+                timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+                for (x, y, w, h) in faces:
+                    if w * h / 2073600 > 0.001:  # assume 1080 * 1920 = 2073600, so more than 1%
+                        cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                        face_count = face_count + 1
+                if face_count > 0:
+                    logger.info("Detected {} faces at {}".format(face_count, timestamp))
+                    say_hello(serial, face_count)
+                    cv.imwrite(os.path.join("images", "{}.jpg".format(timestamp)), img)
+                    time.sleep(5)  # let him go
+                    logger.info("Ready to Go!")
+            else:
+                logger.info("Empty or incorrect response {}".format(resp.status_code))
+                time.sleep(2)  # wait to
         except KeyboardInterrupt:
             # quit
             sys.exit()
         except BaseException as error:
             logger.error('An exception occurred in dispatch thread: {}'.format(error))
+
+
+def init_sound():
+    try:
+        pygame.midi.init()
+        pygame.mixer.init(44100, -16, 2, 2048)
+        pygame.mixer.music.set_volume(10)
+        pygame.mixer.music.load(os.path.join("data", "11days.wav"))
+    except BaseException as error:
+        logger.error("Unable to init sound {}".format(error))
+
+
+def init_serial():
+    try:
+        return serial.Serial('/dev/rfcomm0')
+    except serial.SerialException as error:
+        logger.error("Unable to init serial interface {}".format(error))
+    return None
 
 
 if __name__ == "__main__":
@@ -122,5 +118,7 @@ if __name__ == "__main__":
     # .  ##....##.##...###.##.....##.##..##..##.##.....##.##.....##.##...###
     # ..  ######..##....##..#######...###..###..##.....##.##.....##.##....##
     logger.info("Snowman is starting")
-    say_hello()
-    main_loop()
+    init_sound()
+    serial = init_serial()
+    say_hello(serial, 0)
+    main_loop(serial)
