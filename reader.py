@@ -81,14 +81,17 @@ def main_loop():
                         (x, y, w, h) = find_the_face(faces)
                         contains_big_face = False
                         timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
-                        if w * h / 2073600 > 0.001 and x > 400 and y > 400 and x < 1200 and y < 800:  # assume 1080 * 1920 = 2073600, so more than 10%
-                            cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                            logger.info("Detected big enough({}) face at {}".format(w * h / 2073600, timestamp))
-                            cv.imwrite(
-                                os.path.join("images", "{}.jpg".format(timestamp)), img)
-                            say_hello()
-                            time.sleep(15)  # let him go
-                            logger.info("Ready to Go!")
+                        if w * h / 2073600 > 0.001:
+                            if 400 < x < 1200 and y < 800:  # assume 1080 * 1920 = 2073600, so more than 10%
+                                cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                                logger.info("Detected big enough({}) face at {}".format(w * h / 2073600, timestamp))
+                                cv.imwrite(
+                                    os.path.join("images", "{}.jpg".format(timestamp)), img)
+                                say_hello()
+                                time.sleep(15)  # let him go
+                                logger.info("Ready to Go!")
+                            else:
+                                logger.info("Detected face out of zone({}x{}) at {}".format(x, y, timestamp))
                         else:
                             logger.info("Detected face too small({}) at {}".format(w * h / 2073600, timestamp))
         except KeyboardInterrupt:
