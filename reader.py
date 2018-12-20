@@ -67,7 +67,7 @@ def find_the_face(faces):
 
 
 def main_loop():
-    for _ in range(100000):
+    while True:
         try:
             resp = requests.request("GET", config.cam_url, headers=config.headers, params=config.auth, stream=True)
             if resp.status_code == 200 and resp.headers['content-type'] == 'image/jpeg':
