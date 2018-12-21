@@ -34,7 +34,7 @@ def say_hello(serial, face_count):
         if serial:
             s = EV3BT.encodeMessage(EV3BT.MessageType.Numeric, 'down', 10)
             serial.write(s)
-            time.sleep(7)
+            time.sleep(8)
     except serial.SerialException as error:
         logger.error("Unable to write to serial interface {}".format(error))
 
@@ -57,21 +57,21 @@ def main_loop(serial):
                 img_arr = np.asarray(bytearray(resp.content), dtype="uint8")
                 img = cv.imdecode(img_arr, cv.IMREAD_COLOR)
                 # img = cv.imread("./images/20_12_2018_15_45.jpg")
-                img = img[0:900, 200:1500]  # crop the image to speedup processing
+                height, width, channels = img.shape
+                # crop the image to speedup processing and remove noise
+                img = img[0:int(height * 0.833), int(width * 0.1):int(width * 0.78)]
                 gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
                 faces = face_cascade.detectMultiScale(gray, 1.05, 6)
                 face_count = 0
                 timestamp = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
                 for (x, y, w, h) in faces:
-                    if w * h / 2073600 > 0.001:  # assume 1080 * 1920 = 2073600, so more than 1%
+                    if w * h / height * width > 0.001:  # assume 1080 * 1920 = 2073600, so more than 1%
                         cv.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                         face_count = face_count + 1
                 if face_count > 0:
                     logger.info("Detected {} faces at {}".format(face_count, timestamp))
                     say_hello(serial, face_count)
                     cv.imwrite(os.path.join("images", "{}.jpg".format(timestamp)), img)
-                    time.sleep(5)  # let him go
-                    logger.info("Ready to Go!")
             else:
                 logger.info("Empty or incorrect response {}".format(resp.status_code))
                 time.sleep(2)  # wait to
