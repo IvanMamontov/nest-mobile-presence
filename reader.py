@@ -87,7 +87,7 @@ def init_sound():
         pygame.midi.init()
         pygame.mixer.init(44100, -16, 2, 2048)
         pygame.mixer.music.set_volume(10)
-        pygame.mixer.music.load(os.path.join("data", "11days.wav"))
+        pygame.mixer.music.load(os.path.join("data", "8days.wav"))
     except BaseException as error:
         logger.error("Unable to init sound {}".format(error))
 
@@ -120,5 +120,6 @@ if __name__ == "__main__":
     logger.info("Snowman is starting")
     init_sound()
     serial = init_serial()
-    say_hello(serial, 0)
+    for i in range(1,20):
+        say_hello(serial, 0)
     main_loop(serial)
