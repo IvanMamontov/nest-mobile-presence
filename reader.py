@@ -120,6 +120,5 @@ if __name__ == "__main__":
     logger.info("Snowman is starting")
     init_sound()
     serial = init_serial()
-    for i in range(1,20):
-        say_hello(serial, 0)
+    say_hello(serial, 0)
     main_loop(serial)
