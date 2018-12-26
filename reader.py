@@ -51,7 +51,8 @@ def play_voice():
 def main_loop(serial):
     while True:
         try:
-            resp = requests.request("GET", config.cam_url, headers=config.headers, params=config.auth, stream=True)
+            resp = requests.request("GET", config.cam_url, headers=config.headers, params=config.auth, stream=True,
+                                    verify=False)
             if resp.status_code == 200 and resp.headers['content-type'] == 'image/jpeg' and int(
                     resp.headers['content-length']) != 0:
                 img_arr = np.asarray(bytearray(resp.content), dtype="uint8")
